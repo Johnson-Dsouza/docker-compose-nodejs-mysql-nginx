@@ -1,0 +1,52 @@
+version: "3.8"
+services:
+
+  #Nginx Service
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    networks:
+      - node-network
+    tty: true
+    ports: 
+      - "8080:80"
+    depends_on: 
+      - web
+
+  #NodeJS Service
+  web:
+    build: ./web
+    container_name: web
+    environment:
+      MYSQL_DATABASE: customersdb
+      MYSQL_USER: root
+      MYSQL_PASSWORD: Testpassword@123
+      MYSQL_HOST: db
+    tty: true
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    restart: on-failure
+    networks:
+      - node-network
+
+  #MySQL Service
+  db:
+    build: ./db
+    container_name: db
+    environment:
+      MYSQL_ROOT_PASSWORD: Testpassword@123
+      MYSQL_DATABASE: customersdb
+    command: --innodb-use-native-aio=0
+    tty: true
+    restart: always
+    ports:
+      - "3306:3306"
+    networks:
+      - node-network
+
+#Docker Networks
+networks: 
+  node-network:
+    driver: bridge
